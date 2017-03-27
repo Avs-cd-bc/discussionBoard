@@ -10,9 +10,9 @@
     </tr>
   </thead>
   <tbody>
-    <tr ng-repeat="topic in DC.topics | orderBy: 'createdAt'">
+    <tr ng-repeat="topic in DC.topics | orderBy: 'createdAt' : true">
       <td ng-bind="topic.category"></td>
-      <td ng-bind="topic.content"></td>
+      <td><a href="" ng-bind="topic.content"  ng-click="DC.topic(topic._id)"></a></td>
       <td ng-bind="topic._user.name"></td>
       <td ng-bind="topic.posts.length"></td>
     </tr>

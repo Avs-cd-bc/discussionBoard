@@ -10,6 +10,11 @@ function dashboardController($location, discussionFactory){
       index();
     });
   }
+  self.topic = function(_id){
+    discussionFactory.topic(_id, function(returnedData){
+      console.log(returnedData);
+    })
+  }
 
   function index(){
     discussionFactory.index(function(db){

@@ -24,6 +24,11 @@ function discussionFactory($http){
       callback();
     });
   }
+  factory.topic = function(_id, callback){
+    $http.post("/topicFull", {_id}).then(function(returnedData){
+      callback(returnedData);
+    });
+  }
   factory.getUser = function(){
     return user.name;
   }

@@ -50,6 +50,18 @@ function DiscussionController(){
     });
   }
 
+  // need to populate all the posts for the topic (which shouldhave already been done by index, and populate all the comments for the posts)
+  self.getTopic = function(req, res){
+    console.log(req.body);
+    Topic.findOne({_id: req.body._id})
+    .populate([{path: "_user"}, {path: "posts", populate: {path: "comments"}}]).exec(function(err, popTopic){
+      if(err) res.json(err);
+      else {
+        res.json({success: true, popTopic});
+      }
+    });
+  }
+
   self.post = function(req, res){
 
   }
