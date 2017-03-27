@@ -1,1 +1,32 @@
-<h2>Hello <span ng-bind="DC.userName"></span></h2>
+<h2>Welcome, <span ng-bind="DC.userName"></span>!</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Topic</th>
+      <th>User Name</th>
+      <th>Posts</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="topic in DC.topics | orderBy: 'createdAt'">
+      <td ng-bind="topic.category"></td>
+      <td ng-bind="topic.content"></td>
+      <td ng-bind="topic._user.name"></td>
+      <td ng-bind="topic.posts.length"></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Add a new Topic</h3>
+<form>
+  <label for="topic">Topic: </label>
+  <input id = "topic" type="text" ng-model ="DC.content">
+  <label for="description">Description: </label>
+  <textarea id="description" rows="8" cols="80" ng-model = "DC.description"></textarea>
+  <label>Category: </label>
+  <select ng-model="DC.category" ng-options="category.name for category in DC.categories">
+  </select>
+  <button ng-click="DC.newTopic()">Post Topic!</button>
+</form>

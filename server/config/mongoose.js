@@ -11,6 +11,8 @@ const reg = new RegExp(".js$", "i");
 // we need to define our mongodb location
 const dbURI = "mongodb://localhost/discussionBoard";
 
+mongoose.connect(dbURI);
+
 // If we properly connect we need to be notified
 mongoose.connection.on("connected", function(){
   console.log(`Mongoose default connection open to ${dbURI}`);
