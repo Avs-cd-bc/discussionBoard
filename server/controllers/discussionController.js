@@ -49,10 +49,8 @@ function DiscussionController(){
       }
     });
   }
-
   // need to populate all the posts for the topic (which shouldhave already been done by index, and populate all the comments for the posts)
   self.getTopic = function(req, res){
-    console.log(req.body);
     Topic.findOne({_id: req.body._id})
     .populate([{path: "_user"}, {path: "posts", populate: {path: "comments"}}]).exec(function(err, popTopic){
       if(err) res.json(err);
@@ -62,8 +60,53 @@ function DiscussionController(){
     });
   }
 
+// There has to be a cleaner way to do this....
   self.post = function(req, res){
-
+    console.log(req.body);
+    // Finding the posting user
+    User.findOne({_id: req.body._user}, function(err, user){
+      if(err) res.json(err)
+      else{
+        // finding the post's parent topic
+        Topic.findOne({_id: req.body._topic}, function(err, topic){
+          if(err) res.json(err)
+          else{
+            // creating the new post
+            const postContents = {
+              _user: user._id,
+              _topic: topic._id,
+              content: req.body.content
+            }
+            const tempPost = new Post(postContents);
+            tempPost.save(function(err, newPost){
+              if(err) res.json(err)
+              else{
+                // updating and saving the topic
+                topic.posts.push(newPost._id);
+                topic.save(function(err, updatedTopic){
+                  if(err) res.json(err)
+                  else{
+                    // updating and saving the user
+                    user.posts.push(newPost._id);
+                    user.save(function(err, updatedUser){
+                      if(err) res.json(err)
+                      else{
+                        res.json({
+                          success: true,
+                          topic: updatedTopic,
+                          user: updatedUser,
+                          post: newPost
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
   }
   self.comment = function(req, res){
 

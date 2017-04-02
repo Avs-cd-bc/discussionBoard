@@ -1,0 +1,9 @@
+<h3><span ng-bind="TC.topicUser.name"></span> posted a topic:</h3>
+<h4><strong ng-bind="TC.topic.content"></strong></h4>
+<h4>Description: <span ng-bind="TC.topic.description"></span></h4>
+
+<form>
+  <h3>Post your answer here...</h3>
+  <textarea name="name" rows="8" cols="80" ng-model="TC.postContent"></textarea>
+  <button ng-click="TC.createPost()">Post</button>
+</form>

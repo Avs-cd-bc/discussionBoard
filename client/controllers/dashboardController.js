@@ -3,7 +3,6 @@ angular.module("app").controller("dashboardController", dashboardController);
 function dashboardController($location, $cookies, discussionFactory){
   var self = this;
   discussionFactory.getUser(function(user){
-    console.log(user);
     self.userName = user.name;
   });
   index();
@@ -15,8 +14,8 @@ function dashboardController($location, $cookies, discussionFactory){
   }
   self.topic = function(_id){
     discussionFactory.topic(_id, function(returnedData){
-      console.log(returnedData);
-    })
+      $location.url("/topic");
+    });
   }
 
   function index(){

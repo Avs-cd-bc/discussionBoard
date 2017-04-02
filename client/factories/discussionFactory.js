@@ -4,6 +4,7 @@ function discussionFactory($http, $cookies){
   var factory = {};
   var db = {};
   var user = {};
+  var topic = {};
   factory.login = function(_userName, callback){
     $http.post("/login", {name: _userName}).then(function(returnedData){
       if(returnedData.data.success){
@@ -27,13 +28,29 @@ function discussionFactory($http, $cookies){
       callback();
     });
   }
+  factory.postPost = function(content, callback){
+    var newPost = {
+      _user: user._id,
+      _topic: topic._id,
+      content: content
+    }
+    $http.post("/post", newPost).then(function(returnedData){
+      callback(returnedData);
+    });
+  }
   factory.topic = function(_id, callback){
     $http.post("/topicFull", {_id}).then(function(returnedData){
-      callback(returnedData);
+      if(returnedData.data.success){
+        topic = returnedData.data.popTopic;
+      }
+      callback();
     });
   }
   factory.getUser = function(callback){
     callback($cookies.getObject("user"));
+  }
+  factory.getTopic = function(callback){
+    callback(topic);
   }
   factory.index = function(callback){
     $http.get("/index").then(function(returnedData){
