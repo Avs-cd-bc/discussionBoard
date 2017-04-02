@@ -1,12 +1,15 @@
 angular.module("app").factory("discussionFactory", discussionFactory);
 
-function discussionFactory($http){
+function discussionFactory($http, $cookies){
   var factory = {};
   var db = {};
   var user = {};
   factory.login = function(_userName, callback){
     $http.post("/login", {name: _userName}).then(function(returnedData){
       if(returnedData.data.success){
+        var cookieExpire = new Date();
+        cookieExpire.setHours(cookieExpire.getHours() + 24);
+        $cookies.putObject("user", returnedData.data.user, {expires : cookieExpire})
         user = returnedData.data.user;
       }
       callback(returnedData);
@@ -29,8 +32,8 @@ function discussionFactory($http){
       callback(returnedData);
     });
   }
-  factory.getUser = function(){
-    return user.name;
+  factory.getUser = function(callback){
+    callback($cookies.getObject("user"));
   }
   factory.index = function(callback){
     $http.get("/index").then(function(returnedData){

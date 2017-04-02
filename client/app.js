@@ -1,4 +1,4 @@
-angular.module("app", ["ngRoute"]);
+angular.module("app", ["ngRoute", "ngCookies"]);
 
 angular.module("app").config(function($routeProvider){
   $routeProvider.when("/login", {

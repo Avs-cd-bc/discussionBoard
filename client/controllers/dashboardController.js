@@ -1,8 +1,11 @@
 angular.module("app").controller("dashboardController", dashboardController);
 
-function dashboardController($location, discussionFactory){
+function dashboardController($location, $cookies, discussionFactory){
   var self = this;
-  self.userName = discussionFactory.getUser();
+  discussionFactory.getUser(function(user){
+    console.log(user);
+    self.userName = user.name;
+  });
   index();
 
   self.newTopic = function(){
