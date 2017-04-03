@@ -100,16 +100,13 @@ function DiscussionController(){
   self.post = function(req, res){
 
     var temp = {};
-    console.log(req.body);
     User.findOne({_id: req.body._user}).exec()
     .then(function(user){
       temp.user = user;
-      console.log(temp);
       return Topic.findOne({_id: req.body._topic}).exec();
     })
     .then(function(topic){
       temp.topic = topic;
-      console.log(temp);
       const postContents = {
         _user: temp.user._id,
         _topic: temp.topic._id,
@@ -121,18 +118,15 @@ function DiscussionController(){
     .then(function(newPost){
       temp.newPost = newPost;
       temp.topic.posts.push(newPost._id);
-      console.log(temp);
       return temp.topic.save();
     })
     .then(function(updatedTopic){
       temp.topic = updatedTopic;
       temp.user.posts.push(temp.newPost._id);
-      console.log(temp);
       return temp.user.save();
     })
     .then(function(updatedUser){
       temp.user = updatedUser;
-      console.log(temp);
       res.json({
         success: true,
         topic: temp.topic,
