@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+mongoose.Promise = global.Promise;
+
 const User = mongoose.model("User");
 const Topic = mongoose.model("Topic");
 const Post = mongoose.model("Post");
@@ -22,6 +24,7 @@ function DiscussionController(){
       }
     });
   }
+
   self.topic = function(req, res){
     // find the user posting the topic
     User.findOne({name: req.body._user}, function(err, user){
@@ -49,6 +52,7 @@ function DiscussionController(){
       }
     });
   }
+
   // need to populate all the posts for the topic (which shouldhave already been done by index, and populate all the comments for the posts)
   self.getTopic = function(req, res){
     Topic.findOne({_id: req.body._id})
@@ -60,72 +64,133 @@ function DiscussionController(){
     });
   }
 
-// There has to be a cleaner way to do this....
-  self.post = function(req, res){
-    console.log(req.body);
-    // Finding the posting user
-    User.findOne({_id: req.body._user}, function(err, user){
-      if(err) res.json(err)
-      else{
-        // finding the post's parent topic
-        Topic.findOne({_id: req.body._topic}, function(err, topic){
-          if(err) res.json(err)
-          else{
-            // creating the new post
-            const postContents = {
-              _user: user._id,
-              _topic: topic._id,
-              content: req.body.content
-            }
-            const tempPost = new Post(postContents);
-            tempPost.save(function(err, newPost){
-              if(err) res.json(err)
-              else{
-                // updating and saving the topic
-                topic.posts.push(newPost._id);
-                topic.save(function(err, updatedTopic){
-                  if(err) res.json(err)
-                  else{
-                    // updating and saving the user
-                    user.posts.push(newPost._id);
-                    user.save(function(err, updatedUser){
-                      if(err) res.json(err)
-                      else{
-                        res.json({
-                          success: true,
-                          topic: updatedTopic,
-                          user: updatedUser,
-                          post: newPost
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
+  self.index = function(req, res){
+    /*~~~~ Promise Pattern ~~~~*/
+    var response = {};
+    Category.find({}).exec()
+    .then(function(categories){
+      response.categories = categories;
+      return Topic.find({}).populate("_user").exec();
+    })
+    .then(function(topics){
+      response.success = true;
+      response.topics = topics;
+      res.json(response);
+    })
+    .catch(function(err){
+      res.json(err);
     });
+
+    /*~~~~ Callback Pattern ~~~~*/
+    // Category.find({}, function(err, categories){
+    //   if(err) res.json(err)
+    //   else{
+    //     // Pull down all the topics and populate the users
+    //     Topic.find({}).populate("_user").exec(function(err, topics){
+    //       if(err) res.json(err);
+    //       else{
+    //         res.json({success: true, topics, categories});
+    //       }
+    //     });
+    //   }
+    // });
+  }
+
+/* Promise Pattern*/
+  self.post = function(req, res){
+
+    var temp = {};
+    console.log(req.body);
+    User.findOne({_id: req.body._user}).exec()
+    .then(function(user){
+      temp.user = user;
+      console.log(temp);
+      return Topic.findOne({_id: req.body._topic}).exec();
+    })
+    .then(function(topic){
+      temp.topic = topic;
+      console.log(temp);
+      const postContents = {
+        _user: temp.user._id,
+        _topic: temp.topic._id,
+        content: req.body.content
+      };
+      const tempPost = new Post(postContents);
+      return tempPost.save();
+    })
+    .then(function(newPost){
+      temp.newPost = newPost;
+      temp.topic.posts.push(newPost._id);
+      console.log(temp);
+      return temp.topic.save();
+    })
+    .then(function(updatedTopic){
+      temp.topic = updatedTopic;
+      temp.user.posts.push(temp.newPost._id);
+      console.log(temp);
+      return temp.user.save();
+    })
+    .then(function(updatedUser){
+      temp.user = updatedUser;
+      console.log(temp);
+      res.json({
+        success: true,
+        topic: temp.topic,
+        user: temp.user,
+        post: temp.post
+      });
+    })
+    .catch(function(err){
+      res.json(err)
+    });
+
+    /* ~~~~ Callback Pattern ~~~~ */
+    // User.findOne({_id: req.body._user}, function(err, user){
+    //   if(err) res.json(err)
+    //   else{
+    //     // finding the post's parent topic
+    //     Topic.findOne({_id: req.body._topic}, function(err, topic){
+    //       if(err) res.json(err)
+    //       else{
+    //         // creating the new post
+    //         const postContents = {
+    //           _user: user._id,
+    //           _topic: topic._id,
+    //           content: req.body.content
+    //         }
+    //         const tempPost = new Post(postContents);
+    //         tempPost.save(function(err, newPost){
+    //           if(err) res.json(err)
+    //           else{
+    //             // updating and saving the topic
+    //             topic.posts.push(newPost._id);
+    //             topic.save(function(err, updatedTopic){
+    //               if(err) res.json(err)
+    //               else{
+    //                 // updating and saving the user
+    //                 user.posts.push(newPost._id);
+    //                 user.save(function(err, updatedUser){
+    //                   if(err) res.json(err)
+    //                   else{
+    //                     res.json({
+    //                       success: true,
+    //                       topic: updatedTopic,
+    //                       user: updatedUser,
+    //                       post: newPost
+    //                     });
+    //                   }
+    //                 });
+    //               }
+    //             });
+    //           }
+    //         });
+    //       }
+    //     });
+    //   }
+    // });
   }
   self.comment = function(req, res){
 
-  }
-  self.index = function(req, res){
-    var info = {};
-    // pull down all the categories for topic creation
-    Category.find({}, function(err, categories){
-      if(err) res.json(err)
-      else{
-        // Pull down all the topics and populate the users
-        Topic.find({}).populate("_user").exec(function(err, topics){
-          if(err) res.json(err);
-          else{
-            res.json({success: true, topics, categories});
-          }
-        });
-      }
-    });
   }
 
   function createUser(name, res){

@@ -7,3 +7,7 @@
   <textarea name="name" rows="8" cols="80" ng-model="TC.postContent"></textarea>
   <button ng-click="TC.createPost()">Post</button>
 </form>
+
+<div ng-repeat="post in TC.topic.posts | orderBy: 'CreatedAt' : true">
+  <p ng-bind="post.content"></p>
+</div>

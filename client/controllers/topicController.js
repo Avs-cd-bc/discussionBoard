@@ -9,10 +9,10 @@ function topicController($location, $cookies, discussionFactory){
       self.topicUser = self.topic._user;
     });
   }
-  // need to add post population to the partial and controller
+// need to re-update the post from the back-end (use the populate?)
   self.createPost = function(){
     discussionFactory.postPost(self.postContent, function(returnedData){
-      console.log(returnedData);
+      startUp();
     });
   }
 }
