@@ -67,6 +67,7 @@ function DiscussionController(){
   self.index = function(req, res){
     /*~~~~ Promise Pattern ~~~~*/
     var response = {};
+    // Pulling up all the categories for select population
     Category.find({}).exec()
     .then(function(categories){
       response.categories = categories;
@@ -75,9 +76,10 @@ function DiscussionController(){
     .then(function(topics){
       response.success = true;
       response.topics = topics;
-      res.json(response);
+      return res.json(response);
     })
     .catch(function(err){
+      console.log(err);
       res.json(err);
     });
 
@@ -96,15 +98,18 @@ function DiscussionController(){
     // });
   }
 
-/* Promise Pattern*/
+
+// creates a "post", updates its parent topic and user
   self.post = function(req, res){
 
+    /* Promise Pattern*/
     var temp = {};
+    // Finding the user
     User.findOne({_id: req.body._user}).exec()
     .then(function(user){
       temp.user = user;
       return Topic.findOne({_id: req.body._topic}).exec();
-    })
+    }) // ^^finding the topic, creating a post
     .then(function(topic){
       temp.topic = topic;
       const postContents = {
@@ -113,18 +118,19 @@ function DiscussionController(){
         content: req.body.content
       };
       const tempPost = new Post(postContents);
-      return tempPost.save();
-    })
+      // return tempPost.save();
+      return Promise.reject(new Error("error!"));
+    }) //updating the parent topic
     .then(function(newPost){
       temp.newPost = newPost;
       temp.topic.posts.push(newPost._id);
       return temp.topic.save();
-    })
+    }) //updating the parent user
     .then(function(updatedTopic){
       temp.topic = updatedTopic;
       temp.user.posts.push(temp.newPost._id);
       return temp.user.save();
-    })
+    }) //sending them all back
     .then(function(updatedUser){
       temp.user = updatedUser;
       res.json({
@@ -133,6 +139,7 @@ function DiscussionController(){
         user: temp.user,
         post: temp.post
       });
+      // throw new Error("message!");
     })
     .catch(function(err){
       res.json(err)

@@ -59,6 +59,9 @@ function discussionFactory($http, $cookies){
         db.categories = returnedData.data.categories;
         callback(db);
       }
+      else {
+        console.log("Error: " + returnedData);
+      }
     });
   }
   return factory;
