@@ -35,6 +35,9 @@ function discussionFactory($http, $cookies){
       content: content
     }
     $http.post("/post", newPost).then(function(returnedData){
+      if(returnedData.data.success){
+        topic = returnedData.data.topic;
+      }
       callback(returnedData);
     });
   }

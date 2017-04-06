@@ -118,8 +118,7 @@ function DiscussionController(){
         content: req.body.content
       };
       const tempPost = new Post(postContents);
-      // return tempPost.save();
-      return Promise.reject(new Error("error!"));
+      return tempPost.save();
     }) //updating the parent topic
     .then(function(newPost){
       temp.newPost = newPost;
@@ -130,18 +129,22 @@ function DiscussionController(){
       temp.topic = updatedTopic;
       temp.user.posts.push(temp.newPost._id);
       return temp.user.save();
-    }) //sending them all back
+    }) //Populating the topic with the updated post
     .then(function(updatedUser){
       temp.user = updatedUser;
-      res.json({
+      return temp.topic.populate([{path: "_user"}, {path: "posts", populate:{ path: "comments"}}]).execPopulate();
+    }) //sending everything back
+    .then(function(popTopic){
+      temp.topic = popTopic;
+      return res.json({
         success: true,
         topic: temp.topic,
         user: temp.user,
         post: temp.post
       });
-      // throw new Error("message!");
     })
     .catch(function(err){
+      console.log(err);
       res.json(err)
     });
 

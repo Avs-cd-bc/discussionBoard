@@ -12,6 +12,7 @@ function topicController($location, $cookies, discussionFactory){
 // need to re-update the post from the back-end (use the populate?)
   self.createPost = function(){
     discussionFactory.postPost(self.postContent, function(returnedData){
+      // self.topic = returnedData.data.topic;
       startUp();
     });
   }
